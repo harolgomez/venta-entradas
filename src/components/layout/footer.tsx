@@ -21,6 +21,13 @@ export function Footer() {
               Garantia
             </Link>
             <span className="text-border">|</span>
+            <Link
+              href="/faq"
+              className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+            >
+              FAQ
+            </Link>
+            <span className="text-border">|</span>
             <p className="text-sm text-text-secondary">
               &copy; {new Date().getFullYear()} {SITE_NAME}
             </p>
