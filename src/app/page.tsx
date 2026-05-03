@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EventHero } from "@/components/events/event-hero";
 import { EventCard } from "@/components/events/event-card";
-import { Shield, CreditCard, Ticket, CheckCircle, RotateCcw } from "lucide-react";
+import { Shield, CreditCard, Ticket } from "lucide-react";
 import Link from "next/link";
 import type { Event, TicketZone } from "@/lib/types";
 
@@ -75,7 +75,7 @@ export default async function HomePage() {
             Comprar tus entradas es simple y seguro. Tu compra esta protegida de inicio a fin.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-14 h-14 rounded-xl bg-accent-soft flex items-center justify-center mx-auto mb-4">
                 <Ticket className="w-7 h-7 text-accent" />
@@ -113,55 +113,14 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Trust section */}
-          <div className="bg-surface border border-border rounded-2xl p-8">
-            <div className="flex items-center justify-center gap-2 mb-6">
-              <Shield className="w-6 h-6 text-success" />
-              <h3 className="text-xl font-bold text-text-primary">Compra Protegida</h3>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-success mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-text-primary">Entradas verificadas</p>
-                  <p className="text-xs text-text-secondary">Validamos cada entrada antes de la venta</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <CreditCard className="w-5 h-5 text-success mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-text-primary">Pago con Mercado Pago</p>
-                  <p className="text-xs text-text-secondary">Plataforma segura y confiable</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <RotateCcw className="w-5 h-5 text-success mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-text-primary">Reembolso garantizado</p>
-                  <p className="text-xs text-text-secondary">Si el evento se cancela, te devolvemos el 100%</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Shield className="w-5 h-5 text-success mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-text-primary">Soporte continuo</p>
-                  <p className="text-xs text-text-secondary">Te ayudamos antes y despues de la compra</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="text-center mt-6">
-              <Link
-                href="/garantia"
-                className="text-sm text-accent hover:text-accent-hover transition-colors underline underline-offset-2"
-              >
-                Conoce nuestra garantia completa
-              </Link>
-            </div>
+          <div className="text-center mt-8">
+            <Link
+              href="/garantia"
+              className="inline-flex items-center gap-1.5 text-sm text-accent hover:text-accent-hover transition-colors"
+            >
+              <Shield className="w-4 h-4" />
+              Conoce nuestra garantia de compra protegida
+            </Link>
           </div>
         </div>
       </section>
