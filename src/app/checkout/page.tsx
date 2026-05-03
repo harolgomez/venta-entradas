@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CreditCard, ArrowLeft, Loader2 } from "lucide-react";
+import { CreditCard, ArrowLeft, Loader2, Info } from "lucide-react";
 import { TrustBanner } from "@/components/trust/trust-banner";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useCart } from "@/hooks/use-cart";
 import { useUser } from "@/hooks/use-user";
@@ -16,6 +17,7 @@ export default function CheckoutPage() {
   const { user, loading: userLoading } = useUser();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
+  const [deliveryInfos, setDeliveryInfos] = useState<string[]>([]);
   const router = useRouter();
 
   const serviceFee = totalPrice * SERVICE_FEE_PERCENTAGE;
@@ -27,6 +29,23 @@ export default function CheckoutPage() {
       router.push("/auth/login?redirect=/checkout");
     }
   }, [userLoading, user, router]);
+
+  // Fetch delivery info for events in cart
+  useEffect(() => {
+    if (items.length === 0) return;
+    const eventIds = [...new Set(items.map((i) => i.eventId))];
+    const supabase = createSupabaseBrowserClient();
+    supabase
+      .from("events")
+      .select("delivery_info")
+      .in("id", eventIds)
+      .not("delivery_info", "is", null)
+      .then(({ data }) => {
+        if (data) {
+          setDeliveryInfos(data.map((e) => e.delivery_info).filter(Boolean));
+        }
+      });
+  }, [items]);
 
   if (!userLoading && !user) return null;
 
@@ -124,6 +143,21 @@ export default function CheckoutPage() {
           Aceptamos tarjetas de credito, debito, transferencias y otros medios de pago.
         </p>
       </div>
+
+      {/* Delivery info */}
+      {deliveryInfos.length > 0 && (
+        <div className="bg-accent-soft border border-accent/20 rounded-xl p-4 mb-6">
+          <div className="flex items-start gap-2.5">
+            <Info className="w-4 h-4 text-accent mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-text-primary mb-0.5">Entrega de entradas</p>
+              {deliveryInfos.map((info, i) => (
+                <p key={i} className="text-xs text-text-secondary">{info}</p>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Trust banner */}
       <div className="mb-6">

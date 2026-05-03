@@ -5,7 +5,7 @@ delete from public.ticket_zones;
 delete from public.events;
 
 -- Insert BTS Concert Event - Peru 2026
-insert into public.events (id, title, slug, description, artist, venue, city, event_date, doors_open, image_url, banner_url, category)
+insert into public.events (id, title, slug, description, artist, venue, city, event_date, doors_open, image_url, banner_url, category, delivery_info)
 values (
   'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
   'BTS WORLD TOUR: ARIRANG',
@@ -18,7 +18,8 @@ values (
   '2026-10-09 17:00:00+00',
   '/images/bts-event.jpg',
   '/images/bts-banner.jpg',
-  'concert'
+  'concert',
+  'La transferencia de entradas se realizara via Quentro 30 dias antes del evento. Una vez completada la transferencia, recibiras una notificacion con los detalles.'
 );
 
 -- Insert Ticket Zones (only Soundcheck and Tribuna Oriente)

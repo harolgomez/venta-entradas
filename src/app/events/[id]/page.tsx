@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Calendar, MapPin, Clock, ArrowLeft } from "lucide-react";
+import { Calendar, MapPin, Clock, ArrowLeft, Info } from "lucide-react";
 import { TrustBanner } from "@/components/trust/trust-banner";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -157,8 +157,25 @@ export default async function EventDetailPage({ params }: EventPageProps) {
         )}
       </section>
 
+      {/* Delivery info */}
+      {typedEvent.delivery_info && (
+        <section className="mt-6">
+          <div className="bg-accent-soft border border-accent/20 rounded-xl p-5">
+            <div className="flex items-start gap-3">
+              <Info className="w-5 h-5 text-accent mt-0.5 shrink-0" />
+              <div>
+                <h3 className="font-semibold text-text-primary mb-1">Entrega de entradas</h3>
+                <p className="text-sm text-text-secondary leading-relaxed">
+                  {typedEvent.delivery_info}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Trust banner */}
-      <section className="mt-8">
+      <section className="mt-6">
         <TrustBanner />
       </section>
     </div>

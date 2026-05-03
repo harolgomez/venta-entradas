@@ -11,6 +11,7 @@ export interface Event {
   image_url: string | null;
   banner_url: string | null;
   category: string;
+  delivery_info: string | null;
   status: "active" | "sold_out" | "cancelled" | "past";
   created_at: string;
 }

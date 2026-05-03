@@ -14,7 +14,7 @@ const faqs = [
       },
       {
         q: "¿Cuando recibo mis entradas?",
-        a: "Una vez confirmado tu pago, recibiras la confirmacion de tu compra de forma inmediata. Los detalles de tu entrada estaran disponibles en tu historial de compras.",
+        a: "La entrega depende del evento. En algunos casos, la transferencia de entradas se realiza via plataformas como Quentro dias antes del evento. En la pagina de cada evento encontraras la informacion especifica sobre cuando y como se entregaran las entradas.",
       },
       {
         q: "¿Puedo comprar varias entradas a la vez?",
