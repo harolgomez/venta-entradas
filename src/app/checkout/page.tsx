@@ -10,7 +10,6 @@ import { useCart } from "@/hooks/use-cart";
 import { useUser } from "@/hooks/use-user";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
-import { SERVICE_FEE_PERCENTAGE } from "@/lib/constants";
 
 export default function CheckoutPage() {
   const { items, totalPrice, totalItems } = useCart();
@@ -20,8 +19,7 @@ export default function CheckoutPage() {
   const [deliveryInfos, setDeliveryInfos] = useState<string[]>([]);
   const router = useRouter();
 
-  const serviceFee = totalPrice * SERVICE_FEE_PERCENTAGE;
-  const total = totalPrice + serviceFee;
+  const total = totalPrice;
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -116,16 +114,8 @@ export default function CheckoutPage() {
           ))}
         </div>
 
-        <div className="border-t border-border pt-3 space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-text-secondary">Subtotal</span>
-            <span className="text-text-primary">{formatCurrency(totalPrice)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-text-secondary">Tarifa de servicio (10%)</span>
-            <span className="text-text-primary">{formatCurrency(serviceFee)}</span>
-          </div>
-          <div className="flex justify-between font-semibold text-base pt-2 border-t border-border">
+        <div className="border-t border-border pt-3">
+          <div className="flex justify-between font-semibold text-base">
             <span className="text-text-primary">Total</span>
             <span className="text-accent">{formatCurrency(total)}</span>
           </div>

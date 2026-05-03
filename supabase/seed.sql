@@ -22,7 +22,8 @@ values (
   'La transferencia de entradas se realizara via Quentro 30 dias antes del evento. Una vez completada la transferencia, recibiras una notificacion con los detalles.'
 );
 
--- Insert Ticket Zones (only Soundcheck and Tribuna Oriente)
+-- Insert Ticket Zones
 insert into public.ticket_zones (event_id, name, description, price, currency, total_seats, available, sort_order) values
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Paquete Soundcheck', 'Entrada Campo Acceso A con acceso exclusivo a la prueba de sonido. Incluye articulo VIP, ingreso anticipado y check-in personalizado.', 2591.00, 'PEN', 300, 8, 1),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Oriente (numerado)', 'Asiento numerado en Oriente con excelente vista al escenario principal y pantallas.', 667.00, 'PEN', 5000, 3, 2);
+  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Soundcheck Package - Viernes 9', 'Entrada Campo Acceso A con acceso exclusivo a la prueba de sonido. Incluye articulo VIP, ingreso anticipado y check-in personalizado. Viernes 9 de octubre.', 5500.00, 'PEN', 300, 4, 1),
+  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Soundcheck Package - Sabado 10', 'Entrada Campo Acceso A con acceso exclusivo a la prueba de sonido. Incluye articulo VIP, ingreso anticipado y check-in personalizado. Sabado 10 de octubre.', 5500.00, 'PEN', 300, 4, 2),
+  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Oriente (numerado) - Viernes 9', 'Asiento numerado en Oriente con excelente vista al escenario principal y pantallas. Viernes 9 de octubre.', 4500.00, 'PEN', 5000, 3, 3);

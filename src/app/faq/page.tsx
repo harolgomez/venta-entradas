@@ -34,12 +34,8 @@ const faqs = [
         a: "Aceptamos todos los medios de pago disponibles en Mercado Pago: tarjetas de credito, tarjetas de debito, transferencias bancarias y otros metodos locales.",
       },
       {
-        q: "¿Que es la tarifa de servicio?",
-        a: "La tarifa de servicio es un 10% adicional sobre el subtotal de tu compra. Este monto cubre los costos operativos de la plataforma, la verificacion de entradas y la proteccion al comprador.",
-      },
-      {
         q: "¿Los precios incluyen IGV?",
-        a: "Si, todos los precios mostrados en la plataforma ya incluyen el IGV (18%). No hay cargos ocultos adicionales aparte de la tarifa de servicio.",
+        a: "Si, todos los precios mostrados en la plataforma ya incluyen el IGV (18%). El precio que ves es el precio final, sin cargos ocultos.",
       },
       {
         q: "¿Es seguro pagar en la plataforma?",

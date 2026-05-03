@@ -3,7 +3,6 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { preferenceClient } from "@/lib/mercadopago/server";
 import { checkoutSchema } from "@/lib/validators/checkout";
-import { SERVICE_FEE_PERCENTAGE } from "@/lib/constants";
 
 export async function POST(request: Request) {
   try {
@@ -75,10 +74,8 @@ export async function POST(request: Request) {
       });
     }
 
-    // 5. Calculate totals
-    const subtotal = lineItems.reduce((sum, li) => sum + li.unitPrice * li.quantity, 0);
-    const serviceFee = subtotal * SERVICE_FEE_PERCENTAGE;
-    const total = subtotal + serviceFee;
+    // 5. Calculate total
+    const total = lineItems.reduce((sum, li) => sum + li.unitPrice * li.quantity, 0);
 
     // 6. Get event names for preference items
     const eventIds = [...new Set(lineItems.map((li) => li.eventId))];
@@ -119,26 +116,15 @@ export async function POST(request: Request) {
     await adminSupabase.from("order_items").insert(orderItems);
 
     // 9. Create MercadoPago Preference
-    const currency = lineItems[0]?.currency ?? "USD";
-
     const preference = await preferenceClient.create({
       body: {
-        items: [
-          ...lineItems.map((li) => ({
-            id: li.zoneId,
-            title: `${eventNames.get(li.eventId) ?? "Evento"} - ${li.zoneName}`,
-            quantity: li.quantity,
-            unit_price: li.unitPrice,
-            currency_id: li.currency,
-          })),
-          {
-            id: "service-fee",
-            title: "Tarifa de servicio",
-            quantity: 1,
-            unit_price: serviceFee,
-            currency_id: currency,
-          },
-        ],
+        items: lineItems.map((li) => ({
+          id: li.zoneId,
+          title: `${eventNames.get(li.eventId) ?? "Evento"} - ${li.zoneName}`,
+          quantity: li.quantity,
+          unit_price: li.unitPrice,
+          currency_id: li.currency,
+        })),
         payer: {
           email: user.email!,
         },
