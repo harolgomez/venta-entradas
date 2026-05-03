@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CreditCard, ArrowLeft, Loader2 } from "lucide-react";
+import { TrustBanner } from "@/components/trust/trust-banner";
 import Link from "next/link";
 import { useCart } from "@/hooks/use-cart";
 import { useUser } from "@/hooks/use-user";
@@ -102,7 +103,7 @@ export default function CheckoutPage() {
             <span className="text-text-primary">{formatCurrency(totalPrice)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-text-secondary">Cargo por servicio (10%)</span>
+            <span className="text-text-secondary">Tarifa de servicio (10%)</span>
             <span className="text-text-primary">{formatCurrency(serviceFee)}</span>
           </div>
           <div className="flex justify-between font-semibold text-base pt-2 border-t border-border">
@@ -122,6 +123,11 @@ export default function CheckoutPage() {
           Seras redirigido a Mercado Pago para completar el pago de forma segura.
           Aceptamos tarjetas de credito, debito, transferencias y otros medios de pago.
         </p>
+      </div>
+
+      {/* Trust banner */}
+      <div className="mb-6">
+        <TrustBanner variant="compact" />
       </div>
 
       {error && (

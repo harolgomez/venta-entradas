@@ -133,7 +133,7 @@ export async function POST(request: Request) {
           })),
           {
             id: "service-fee",
-            title: "Cargo por servicio",
+            title: "Tarifa de servicio",
             quantity: 1,
             unit_price: serviceFee,
             currency_id: currency,

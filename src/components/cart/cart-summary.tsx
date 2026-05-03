@@ -25,7 +25,7 @@ export function CartSummary() {
           <span className="text-text-primary">{formatCurrency(totalPrice)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-text-secondary">Cargo por servicio (10%)</span>
+          <span className="text-text-secondary">Tarifa de servicio (10%)</span>
           <span className="text-text-primary">{formatCurrency(serviceFee)}</span>
         </div>
         <div className="border-t border-border pt-2 flex justify-between font-semibold text-base">

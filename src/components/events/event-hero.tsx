@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,9 +13,25 @@ interface EventHeroProps {
 export function EventHero({ event }: EventHeroProps) {
   return (
     <section className="relative overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/20 via-background to-background" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(139,92,246,0.15),transparent_70%)]" />
+      {/* Background image */}
+      {event.banner_url ? (
+        <>
+          <Image
+            src={event.banner_url}
+            alt={event.title}
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/40" />
+        </>
+      ) : (
+        <>
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/20 via-background to-background" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(6,182,212,0.15),transparent_70%)]" />
+        </>
+      )}
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
         <div className="max-w-3xl">

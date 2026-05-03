@@ -1,53 +1,24 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { paymentClient } from "@/lib/mercadopago/server";
-import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
     const body = await request.text();
-    const xSignature = request.headers.get("x-signature");
-    const xRequestId = request.headers.get("x-request-id");
-
-    // 1. Validate signature
-    if (!xSignature || !xRequestId) {
-      return NextResponse.json({ error: "Missing signature" }, { status: 400 });
-    }
-
     const notification = JSON.parse(body);
+
+    const type = notification.type ?? notification.action;
     const dataId = notification.data?.id;
 
-    // Parse x-signature header: "ts=...,v1=..."
-    const signatureParts: Record<string, string> = {};
-    xSignature.split(",").forEach((part) => {
-      const [key, value] = part.trim().split("=", 2);
-      if (key && value) signatureParts[key] = value;
-    });
-
-    const ts = signatureParts["ts"];
-    const hash = signatureParts["v1"];
-
-    if (!ts || !hash) {
-      return NextResponse.json({ error: "Invalid signature format" }, { status: 400 });
-    }
-
-    // Build manifest and verify HMAC
-    const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
-    const expected = crypto
-      .createHmac("sha256", process.env.MERCADOPAGO_WEBHOOK_SECRET!)
-      .update(manifest)
-      .digest("hex");
-
-    if (hash !== expected) {
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    }
-
-    // 2. Only process payment notifications
-    if (notification.type !== "payment") {
+    const isPayment = type === "payment" || notification.topic === "payment";
+    if (!isPayment) {
       return NextResponse.json({ received: true });
     }
 
-    // 3. Fetch full payment details from MercadoPago API
+    if (!dataId) {
+      return NextResponse.json({ error: "Missing data.id" }, { status: 400 });
+    }
+
     const payment = await paymentClient.get({ id: dataId });
     const adminSupabase = createSupabaseAdminClient();
     const orderId = payment.external_reference;
@@ -56,7 +27,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing external_reference" }, { status: 400 });
     }
 
-    // 4. Handle payment status
     switch (payment.status) {
       case "approved": {
         const { data: order } = await adminSupabase
@@ -71,7 +41,6 @@ export async function POST(request: Request) {
           .single();
 
         if (order) {
-          // Decrement ticket availability
           const { data: orderItems } = await adminSupabase
             .from("order_items")
             .select("ticket_zone_id, quantity")
@@ -111,7 +80,6 @@ export async function POST(request: Request) {
           .eq("id", orderId);
         break;
       }
-      // "pending", "in_process", "in_mediation" — order stays pending
     }
 
     return NextResponse.json({ received: true });

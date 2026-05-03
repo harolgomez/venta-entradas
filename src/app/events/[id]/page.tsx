@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { Calendar, MapPin, Clock, ArrowLeft } from "lucide-react";
+import { TrustBanner } from "@/components/trust/trust-banner";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -67,11 +69,27 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
       {/* Event header */}
       <div className="mb-8">
-        {/* Banner gradient */}
-        <div className="h-48 sm:h-64 rounded-xl bg-gradient-to-br from-accent/30 via-surface to-surface-hover flex items-center justify-center mb-6">
-          <span className="text-6xl sm:text-8xl font-bold text-accent/30">
-            {typedEvent.artist}
-          </span>
+        {/* Banner */}
+        <div className="relative h-48 sm:h-72 rounded-xl overflow-hidden mb-6">
+          {typedEvent.banner_url ? (
+            <>
+              <Image
+                src={typedEvent.banner_url}
+                alt={typedEvent.title}
+                fill
+                className="object-cover"
+                priority
+                sizes="100vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+            </>
+          ) : (
+            <div className="h-full bg-gradient-to-br from-accent/30 via-surface to-surface-hover flex items-center justify-center">
+              <span className="text-6xl sm:text-8xl font-bold text-accent/30">
+                {typedEvent.artist}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -137,6 +155,11 @@ export default async function EventDetailPage({ params }: EventPageProps) {
             No hay zonas de entradas configuradas para este evento.
           </p>
         )}
+      </section>
+
+      {/* Trust banner */}
+      <section className="mt-8">
+        <TrustBanner />
       </section>
     </div>
   );

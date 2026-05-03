@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Calendar, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,11 +15,23 @@ export function EventCard({ event, minPrice }: EventCardProps) {
   return (
     <Link href={`/events/${event.slug}`}>
       <Card className="group hover:border-accent/50 transition-all duration-300 hover:shadow-lg hover:shadow-accent/5">
-        {/* Image placeholder with gradient */}
-        <div className="h-48 bg-gradient-to-br from-accent/30 via-surface to-surface-hover flex items-center justify-center">
-          <span className="text-5xl font-bold text-accent/40 group-hover:text-accent/60 transition-colors">
-            {event.artist}
-          </span>
+        <div className="relative h-48 overflow-hidden">
+          {event.image_url ? (
+            <Image
+              src={event.image_url}
+              alt={event.title}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="h-full bg-gradient-to-br from-accent/30 via-surface to-surface-hover flex items-center justify-center">
+              <span className="text-5xl font-bold text-accent/40 group-hover:text-accent/60 transition-colors">
+                {event.artist}
+              </span>
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-surface/80 to-transparent" />
         </div>
 
         <CardContent>
