@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { paymentClient } from "@/lib/mercadopago/server";
+import { getResendClient } from "@/lib/email/server";
+import { buildConfirmationEmail } from "@/lib/email/templates";
+import { SITE_NAME } from "@/lib/constants";
 
 export async function POST(request: Request) {
   try {
@@ -37,10 +40,11 @@ export async function POST(request: Request) {
             updated_at: new Date().toISOString(),
           })
           .eq("id", orderId)
-          .select("id")
+          .select("id, customer_email, total, currency")
           .single();
 
         if (order) {
+          // Decrement availability
           const { data: orderItems } = await adminSupabase
             .from("order_items")
             .select("ticket_zone_id, quantity")
@@ -53,6 +57,59 @@ export async function POST(request: Request) {
                 p_quantity: item.quantity,
               });
             }
+          }
+
+          // Send confirmation email
+          try {
+            const { data: fullItems } = await adminSupabase
+              .from("order_items")
+              .select(`
+                quantity,
+                unit_price,
+                ticket_zone:ticket_zones(name),
+                event:events(title, artist, event_date, venue, city, delivery_info)
+              `)
+              .eq("order_id", order.id);
+
+            if (fullItems && fullItems.length > 0) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const emailItems = fullItems.map((item: any) => {
+                const zone = item.ticket_zone;
+                const event = item.event;
+                return {
+                  zoneName: zone?.name ?? "Entrada",
+                  quantity: item.quantity,
+                  unitPrice: item.unit_price,
+                  eventTitle: event?.title ?? "Evento",
+                  eventArtist: event?.artist ?? "",
+                  eventDate: event?.event_date ?? "",
+                  eventVenue: event?.venue ?? "",
+                  eventCity: event?.city ?? "",
+                  deliveryInfo: event?.delivery_info ?? null,
+                };
+              });
+
+              const { subject, html } = buildConfirmationEmail({
+                orderId: order.id,
+                customerEmail: order.customer_email,
+                total: order.total,
+                currency: order.currency,
+                items: emailItems,
+              });
+
+              const resendClient = getResendClient();
+              if (resendClient) {
+                await resendClient.emails.send({
+                  from: `${SITE_NAME} <noreply@${process.env.RESEND_DOMAIN ?? "boletta.com"}>`,
+                  to: order.customer_email,
+                  subject,
+                  html,
+                });
+              }
+            }
+          } catch (emailError) {
+            console.error("Error sending confirmation email:", emailError);
+            // Don't fail the webhook if email fails
           }
         }
         break;
