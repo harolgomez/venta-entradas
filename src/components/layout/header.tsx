@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Ticket, ShoppingCart, Menu, X, User, LogOut } from "lucide-react";
+import { ShoppingCart, Menu, X, User, LogOut } from "lucide-react";
 import { useState } from "react";
-import { SITE_NAME, NAV_LINKS } from "@/lib/constants";
+import { NAV_LINKS } from "@/lib/constants";
+import { LogoFull } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/use-cart";
 import { useUser } from "@/hooks/use-user";
@@ -21,11 +22,8 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <Ticket className="w-6 h-6 text-accent group-hover:rotate-12 transition-transform" />
-            <span className="text-xl font-bold text-text-primary">
-              {SITE_NAME}
-            </span>
+          <Link href="/" className="group">
+            <LogoFull />
           </Link>
 
           {/* Desktop Nav */}
