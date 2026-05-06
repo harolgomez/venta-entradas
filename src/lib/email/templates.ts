@@ -76,7 +76,8 @@ export function buildConfirmationEmail(data: OrderEmailData) {
 
     <!-- Header -->
     <div style="text-align: center; padding: 32px 0 24px;">
-      <h1 style="margin: 0; color: #06b6d4; font-size: 28px; font-weight: bold;">${SITE_NAME}</h1>
+      <div style="display: inline-block; background-color: #06b6d4; color: #0a0a0f; font-size: 18px; font-weight: bold; width: 40px; height: 40px; line-height: 40px; border-radius: 10px; text-align: center; vertical-align: middle;">B</div>
+      <span style="color: #06b6d4; font-size: 28px; font-weight: bold; vertical-align: middle; margin-left: 8px;">${SITE_NAME}</span>
     </div>
 
     <!-- Success banner -->

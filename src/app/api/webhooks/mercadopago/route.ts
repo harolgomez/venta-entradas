@@ -100,7 +100,7 @@ export async function POST(request: Request) {
               const resendClient = getResendClient();
               if (resendClient) {
                 await resendClient.emails.send({
-                  from: `${SITE_NAME} <noreply@${process.env.RESEND_DOMAIN ?? "boletta.com"}>`,
+                  from: `${SITE_NAME} <${process.env.RESEND_FROM_EMAIL ?? "admin@boletta.pe"}>`,
                   to: order.customer_email,
                   subject,
                   html,
