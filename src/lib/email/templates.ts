@@ -76,7 +76,7 @@ export function buildConfirmationEmail(data: OrderEmailData) {
 
     <!-- Header -->
     <div style="text-align: center; padding: 32px 0 24px;">
-      <div style="display: inline-block; background-color: #06b6d4; color: #0a0a0f; font-size: 18px; font-weight: bold; width: 40px; height: 40px; line-height: 40px; border-radius: 10px; text-align: center; vertical-align: middle;">B</div>
+      <img src="${process.env.NEXT_PUBLIC_APP_URL ?? "https://boletta.pe"}/images/logo-email.png" alt="${SITE_NAME}" width="40" height="40" style="display: inline-block; vertical-align: middle;" />
       <span style="color: #06b6d4; font-size: 28px; font-weight: bold; vertical-align: middle; margin-left: 8px;">${SITE_NAME}</span>
     </div>
 
