@@ -14,10 +14,22 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: `${SITE_NAME} - Reventa de Entradas`,
+    default: `${SITE_NAME} - Compra de Entradas`,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
+  openGraph: {
+    title: `${SITE_NAME} - Compra de Entradas`,
+    description: SITE_DESCRIPTION,
+    siteName: SITE_NAME,
+    locale: "es_PE",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} - Compra de Entradas`,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({
