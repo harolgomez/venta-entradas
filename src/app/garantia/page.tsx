@@ -130,11 +130,11 @@ export default function GarantiaPage() {
           Estamos aqui para ayudarte. Contactanos para cualquier consulta sobre tu compra.
         </p>
         <a
-          href="mailto:soporte@reventa.com"
+          href="mailto:admin@boletta.pe"
           className="inline-flex items-center gap-2 text-accent hover:text-accent-hover transition-colors font-medium"
         >
           <Mail className="w-4 h-4" />
-          soporte@reventa.com
+          admin@boletta.pe
         </a>
       </div>
     </div>

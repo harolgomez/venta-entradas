@@ -77,7 +77,7 @@ const faqs = [
       },
       {
         q: "¿Como contacto a soporte?",
-        a: "Puedes escribirnos a soporte@reventa.com. Nuestro equipo te respondera a la brevedad posible.",
+        a: "Puedes escribirnos a admin@boletta.pe. Nuestro equipo te respondera a la brevedad posible.",
       },
     ],
   },
@@ -119,10 +119,10 @@ export default function FAQPage() {
           ¿No encontraste lo que buscabas?
         </p>
         <a
-          href="mailto:soporte@reventa.com"
+          href="mailto:admin@boletta.pe"
           className="text-accent hover:text-accent-hover transition-colors font-medium text-sm"
         >
-          Escribenos a soporte@reventa.com
+          Escribenos a admin@boletta.pe
         </a>
       </div>
     </div>

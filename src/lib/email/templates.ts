@@ -81,7 +81,7 @@ export function buildConfirmationEmail(data: OrderEmailData) {
 
     <!-- Success banner -->
     <div style="background-color: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px;">
-      <div style="font-size: 32px; margin-bottom: 8px;">✓</div>
+      <div style="font-size: 32px; margin-bottom: 8px; color: #22c55e;">✅</div>
       <h2 style="margin: 0 0 4px; color: #22c55e; font-size: 20px;">Compra confirmada</h2>
       <p style="margin: 0; color: #9d9db8; font-size: 14px;">Orden #${orderId.slice(0, 8)}</p>
     </div>
@@ -138,7 +138,7 @@ export function buildConfirmationEmail(data: OrderEmailData) {
     <div style="text-align: center; padding: 24px 0; border-top: 1px solid #2a2a3a;">
       <p style="margin: 0 0 8px; color: #9d9db8; font-size: 13px;">
         ¿Tienes alguna pregunta? Escribenos a
-        <a href="mailto:soporte@boletta.com" style="color: #06b6d4; text-decoration: none;">soporte@boletta.com</a>
+        <a href="mailto:admin@boletta.pe" style="color: #06b6d4; text-decoration: none;">admin@boletta.pe</a>
       </p>
       <p style="margin: 0; color: #9d9db8; font-size: 12px;">
         &copy; ${new Date().getFullYear()} ${SITE_NAME}. Todos los derechos reservados.
