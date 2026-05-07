@@ -134,7 +134,7 @@ export async function POST(request: Request) {
           pending: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/pending`,
         },
         auto_return: "approved",
-        notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mercadopago`,
+        notification_url: "https://www.boletta.pe/api/webhooks/mercadopago",
         external_reference: order.id,
       },
     });
