@@ -8,31 +8,42 @@ import { SITE_NAME } from "@/lib/constants";
 export async function POST(request: Request) {
   try {
     const body = await request.text();
+    console.log("[WEBHOOK] Received:", body);
+
     const notification = JSON.parse(body);
 
     const type = notification.type ?? notification.action;
     const dataId = notification.data?.id;
 
+    console.log("[WEBHOOK] Type:", type, "| DataId:", dataId, "| Topic:", notification.topic);
+
     const isPayment = type === "payment" || notification.topic === "payment";
     if (!isPayment) {
+      console.log("[WEBHOOK] Not a payment notification, skipping");
       return NextResponse.json({ received: true });
     }
 
     if (!dataId) {
+      console.log("[WEBHOOK] Missing data.id");
       return NextResponse.json({ error: "Missing data.id" }, { status: 400 });
     }
 
+    console.log("[WEBHOOK] Fetching payment from MercadoPago...");
     const payment = await paymentClient.get({ id: dataId });
+    console.log("[WEBHOOK] Payment status:", payment.status, "| ID:", payment.id, "| external_reference:", payment.external_reference);
+
     const adminSupabase = createSupabaseAdminClient();
     const orderId = payment.external_reference;
 
     if (!orderId) {
+      console.log("[WEBHOOK] Missing external_reference");
       return NextResponse.json({ error: "Missing external_reference" }, { status: 400 });
     }
 
     switch (payment.status) {
       case "approved": {
-        const { data: order } = await adminSupabase
+        console.log("[WEBHOOK] Payment approved, updating order:", orderId);
+        const { data: order, error: orderError } = await adminSupabase
           .from("orders")
           .update({
             status: "paid",
@@ -43,7 +54,13 @@ export async function POST(request: Request) {
           .select("id, customer_email, total, currency")
           .single();
 
+        if (orderError) {
+          console.error("[WEBHOOK] Error updating order:", orderError);
+        }
+
         if (order) {
+          console.log("[WEBHOOK] Order updated to paid:", order.id, "| Email:", order.customer_email);
+
           // Decrement availability
           const { data: orderItems } = await adminSupabase
             .from("order_items")
@@ -52,6 +69,7 @@ export async function POST(request: Request) {
 
           if (orderItems) {
             for (const item of orderItems) {
+              console.log("[WEBHOOK] Decrementing zone:", item.ticket_zone_id, "qty:", item.quantity);
               await adminSupabase.rpc("decrement_availability", {
                 p_zone_id: item.ticket_zone_id,
                 p_quantity: item.quantity,
@@ -70,6 +88,8 @@ export async function POST(request: Request) {
                 event:events(title, artist, event_date, venue, city, delivery_info)
               `)
               .eq("order_id", order.id);
+
+            console.log("[WEBHOOK] Email items found:", fullItems?.length ?? 0);
 
             if (fullItems && fullItems.length > 0) {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,24 +119,30 @@ export async function POST(request: Request) {
 
               const resendClient = getResendClient();
               if (resendClient) {
-                await resendClient.emails.send({
+                console.log("[WEBHOOK] Sending email to:", order.customer_email);
+                const emailResult = await resendClient.emails.send({
                   from: `${SITE_NAME} <${process.env.RESEND_FROM_EMAIL ?? "admin@boletta.pe"}>`,
                   to: order.customer_email,
                   subject,
                   html,
                 });
+                console.log("[WEBHOOK] Email sent:", JSON.stringify(emailResult));
+              } else {
+                console.log("[WEBHOOK] Resend client not available (no API key)");
               }
             }
           } catch (emailError) {
-            console.error("Error sending confirmation email:", emailError);
-            // Don't fail the webhook if email fails
+            console.error("[WEBHOOK] Error sending confirmation email:", emailError);
           }
+        } else {
+          console.log("[WEBHOOK] Order not found for id:", orderId);
         }
         break;
       }
 
       case "rejected":
       case "cancelled": {
+        console.log("[WEBHOOK] Payment", payment.status, "- updating order to failed:", orderId);
         await adminSupabase
           .from("orders")
           .update({
@@ -128,6 +154,7 @@ export async function POST(request: Request) {
       }
 
       case "refunded": {
+        console.log("[WEBHOOK] Payment refunded - updating order:", orderId);
         await adminSupabase
           .from("orders")
           .update({
@@ -137,11 +164,16 @@ export async function POST(request: Request) {
           .eq("id", orderId);
         break;
       }
+
+      default: {
+        console.log("[WEBHOOK] Unhandled payment status:", payment.status);
+      }
     }
 
+    console.log("[WEBHOOK] Done processing");
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("MercadoPago webhook error:", error);
+    console.error("[WEBHOOK] Error:", error);
     return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 });
   }
 }
