@@ -64,7 +64,7 @@ export function CartSummary() {
 
       {hasReservations && (
         <p className="text-xs text-amber-400 leading-relaxed">
-          El saldo pendiente de las reservas debe pagarse 30 dias antes del evento.
+          El saldo pendiente de las reservas debe pagarse desde 30 dias antes del evento, con un plazo maximo de 2 dias.
         </p>
       )}
 

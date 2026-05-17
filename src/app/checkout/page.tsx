@@ -109,9 +109,9 @@ export default function CheckoutPage() {
               <p className="text-sm font-medium text-amber-200 mb-1">Reserva de entradas</p>
               <p className="text-xs text-amber-200/80 leading-relaxed">
                 Estas separando entradas pagando el 20% del valor total. El 80% restante
-                debe pagarse hasta 30 dias antes del evento. Si no se completa el pago
-                dentro de ese plazo, la reserva sera anulada y no se realizara devolucion
-                del monto abonado.
+                debe pagarse desde 30 dias antes del evento, con un plazo maximo de 2 dias
+                para completar el pago. Si no se completa dentro de ese plazo, la reserva
+                sera anulada y no se realizara devolucion del monto abonado.
               </p>
             </div>
           </div>

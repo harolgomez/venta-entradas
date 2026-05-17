@@ -173,8 +173,9 @@ export default async function EventDetailPage({ params }: EventPageProps) {
           <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-4">
             <p className="text-sm text-amber-200 leading-relaxed">
               <strong>Importante:</strong> El 80% restante del valor de la entrada debe pagarse
-              hasta 30 dias antes del evento. Si no se completa el pago dentro de ese plazo,
-              la reserva sera anulada y no se realizara devolucion del monto abonado.
+              desde 30 dias antes del evento, con un plazo maximo de 2 dias para completar el pago.
+              Si no se completa dentro de ese plazo, la reserva sera anulada y no se realizara
+              devolucion del monto abonado.
             </p>
           </div>
 

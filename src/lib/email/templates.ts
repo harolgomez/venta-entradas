@@ -37,16 +37,22 @@ function formatDateEmail(dateStr: string): string {
   });
 }
 
-function formatDeadlineDate(eventDateStr: string): string {
+function formatPaymentWindow(eventDateStr: string): { from: string; deadline: string } {
   const eventDate = new Date(eventDateStr);
-  const deadline = new Date(eventDate);
-  deadline.setDate(deadline.getDate() - 30);
-  return deadline.toLocaleDateString("es-PE", {
+  const from = new Date(eventDate);
+  from.setDate(from.getDate() - 30);
+  const deadline = new Date(from);
+  deadline.setDate(deadline.getDate() + 2);
+  const opts: Intl.DateTimeFormatOptions = {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
-  });
+  };
+  return {
+    from: from.toLocaleDateString("es-PE", opts),
+    deadline: deadline.toLocaleDateString("es-PE", opts),
+  };
 }
 
 export function buildConfirmationEmail(data: OrderEmailData) {
@@ -81,7 +87,7 @@ export function buildConfirmationEmail(data: OrderEmailData) {
     : `Compra confirmada - ${event.eventTitle}`;
 
   const pendingAmount = reservationTotal != null ? reservationTotal - total : 0;
-  const deadlineDate = formatDeadlineDate(event.eventDate);
+  const paymentWindow = formatPaymentWindow(event.eventDate);
 
   const html = `
 <!DOCTYPE html>
@@ -112,11 +118,10 @@ export function buildConfirmationEmail(data: OrderEmailData) {
       <h3 style="margin: 0 0 8px; color: #f59e0b; font-size: 16px;">⚠️ Informacion importante sobre tu reserva</h3>
       <p style="margin: 0 0 8px; color: #f0f0f5; font-size: 14px; line-height: 1.6;">
         Has separado tu entrada pagando el <strong>20%</strong> del valor total.
-        El saldo pendiente debe completarse antes del:
+        El saldo pendiente debe pagarse desde 30 dias antes del evento, con un plazo maximo de 2 dias:
       </p>
-      <p style="margin: 0 0 12px; color: #f59e0b; font-size: 16px; font-weight: bold; text-align: center;">
-        ${deadlineDate}
-      </p>
+      <p style="margin: 0 0 4px; color: #9d9db8; font-size: 13px; text-align: center;">Desde: <strong style="color: #f0f0f5;">${paymentWindow.from}</strong></p>
+      <p style="margin: 0 0 12px; color: #9d9db8; font-size: 13px; text-align: center;">Fecha limite: <strong style="color: #f59e0b;">${paymentWindow.deadline}</strong></p>
       <table style="width: 100%; margin-bottom: 8px;" cellpadding="0" cellspacing="0">
         <tr>
           <td style="padding: 4px 0; color: #9d9db8; font-size: 14px;">Valor total de entrada(s)</td>
@@ -132,7 +137,7 @@ export function buildConfirmationEmail(data: OrderEmailData) {
         </tr>
       </table>
       <p style="margin: 0; color: #ef4444; font-size: 13px; line-height: 1.5;">
-        Si no se completa el pago dentro del plazo indicado, la reserva sera anulada
+        Si no se completa el pago dentro del plazo de 2 dias, la reserva sera anulada
         y no se realizara devolucion del monto abonado.
       </p>
     </div>
