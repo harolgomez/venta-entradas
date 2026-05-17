@@ -40,7 +40,7 @@ export async function POST(request: Request) {
             updated_at: new Date().toISOString(),
           })
           .eq("id", orderId)
-          .select("id, customer_email, total, currency")
+          .select("id, customer_email, total, currency, is_reservation, reservation_total")
           .single();
 
         if (order) {
@@ -94,6 +94,8 @@ export async function POST(request: Request) {
                 customerEmail: order.customer_email,
                 total: order.total,
                 currency: order.currency,
+                isReservation: order.is_reservation ?? false,
+                reservationTotal: order.reservation_total ?? null,
                 items: emailItems,
               });
 

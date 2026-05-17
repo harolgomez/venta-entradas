@@ -5,6 +5,8 @@ interface OrderEmailData {
   customerEmail: string;
   total: number;
   currency: string;
+  isReservation: boolean;
+  reservationTotal: number | null;
   items: {
     zoneName: string;
     quantity: number;
@@ -35,8 +37,20 @@ function formatDateEmail(dateStr: string): string {
   });
 }
 
+function formatDeadlineDate(eventDateStr: string): string {
+  const eventDate = new Date(eventDateStr);
+  const deadline = new Date(eventDate);
+  deadline.setDate(deadline.getDate() - 30);
+  return deadline.toLocaleDateString("es-PE", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 export function buildConfirmationEmail(data: OrderEmailData) {
-  const { orderId, total, currency, items } = data;
+  const { orderId, total, currency, items, isReservation, reservationTotal } = data;
 
   // Get unique delivery infos
   const deliveryInfos = [...new Set(items.map((i) => i.deliveryInfo).filter(Boolean))];
@@ -62,7 +76,12 @@ export function buildConfirmationEmail(data: OrderEmailData) {
   // Event details (use first item as reference)
   const event = items[0];
 
-  const subject = `Compra confirmada - ${event.eventTitle}`;
+  const subject = isReservation
+    ? `Reserva confirmada - ${event.eventTitle}`
+    : `Compra confirmada - ${event.eventTitle}`;
+
+  const pendingAmount = reservationTotal != null ? reservationTotal - total : 0;
+  const deadlineDate = formatDeadlineDate(event.eventDate);
 
   const html = `
 <!DOCTYPE html>
@@ -81,11 +100,43 @@ export function buildConfirmationEmail(data: OrderEmailData) {
     </div>
 
     <!-- Success banner -->
-    <div style="background-color: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px;">
-      <div style="font-size: 32px; margin-bottom: 8px; color: #22c55e;">✅</div>
-      <h2 style="margin: 0 0 4px; color: #22c55e; font-size: 20px;">Compra confirmada</h2>
+    <div style="background-color: ${isReservation ? "rgba(245, 158, 11, 0.1)" : "rgba(34, 197, 94, 0.1)"}; border: 1px solid ${isReservation ? "rgba(245, 158, 11, 0.3)" : "rgba(34, 197, 94, 0.3)"}; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px;">
+      <div style="font-size: 32px; margin-bottom: 8px; color: ${isReservation ? "#f59e0b" : "#22c55e"};">${isReservation ? "📋" : "✅"}</div>
+      <h2 style="margin: 0 0 4px; color: ${isReservation ? "#f59e0b" : "#22c55e"}; font-size: 20px;">${isReservation ? "Reserva confirmada" : "Compra confirmada"}</h2>
       <p style="margin: 0; color: #9d9db8; font-size: 14px;">Orden #${orderId.slice(0, 8)}</p>
     </div>
+
+    ${isReservation ? `
+    <!-- Reservation warning -->
+    <div style="background-color: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+      <h3 style="margin: 0 0 8px; color: #f59e0b; font-size: 16px;">⚠️ Informacion importante sobre tu reserva</h3>
+      <p style="margin: 0 0 8px; color: #f0f0f5; font-size: 14px; line-height: 1.6;">
+        Has separado tu entrada pagando el <strong>20%</strong> del valor total.
+        El saldo pendiente debe completarse antes del:
+      </p>
+      <p style="margin: 0 0 12px; color: #f59e0b; font-size: 16px; font-weight: bold; text-align: center;">
+        ${deadlineDate}
+      </p>
+      <table style="width: 100%; margin-bottom: 8px;" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="padding: 4px 0; color: #9d9db8; font-size: 14px;">Valor total de entrada(s)</td>
+          <td style="padding: 4px 0; color: #f0f0f5; font-size: 14px; text-align: right;">${formatCurrencyEmail(reservationTotal ?? 0, currency)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 4px 0; color: #9d9db8; font-size: 14px;">Pagado hoy (20%)</td>
+          <td style="padding: 4px 0; color: #22c55e; font-size: 14px; text-align: right;">${formatCurrencyEmail(total, currency)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 4px 0; color: #9d9db8; font-size: 14px; font-weight: bold;">Saldo pendiente (80%)</td>
+          <td style="padding: 4px 0; color: #f59e0b; font-size: 14px; font-weight: bold; text-align: right;">${formatCurrencyEmail(pendingAmount, currency)}</td>
+        </tr>
+      </table>
+      <p style="margin: 0; color: #ef4444; font-size: 13px; line-height: 1.5;">
+        Si no se completa el pago dentro del plazo indicado, la reserva sera anulada
+        y no se realizara devolucion del monto abonado.
+      </p>
+    </div>
+    ` : ""}
 
     <!-- Event info -->
     <div style="background-color: #12121a; border: 1px solid #2a2a3a; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
@@ -106,7 +157,7 @@ export function buildConfirmationEmail(data: OrderEmailData) {
     <!-- Order items -->
     <div style="background-color: #12121a; border: 1px solid #2a2a3a; border-radius: 12px; overflow: hidden; margin-bottom: 24px;">
       <div style="padding: 16px; border-bottom: 1px solid #2a2a3a;">
-        <h3 style="margin: 0; color: #f0f0f5; font-size: 16px;">Detalle de tu compra</h3>
+        <h3 style="margin: 0; color: #f0f0f5; font-size: 16px;">${isReservation ? "Detalle de tu reserva" : "Detalle de tu compra"}</h3>
       </div>
       <table style="width: 100%; border-collapse: collapse;" cellpadding="0" cellspacing="0">
         <thead>
@@ -121,13 +172,13 @@ export function buildConfirmationEmail(data: OrderEmailData) {
         </tbody>
       </table>
       <div style="padding: 16px; border-top: 1px solid #2a2a3a; text-align: right;">
-        <span style="color: #9d9db8; font-size: 14px;">Total: </span>
+        <span style="color: #9d9db8; font-size: 14px;">${isReservation ? "Pagado hoy: " : "Total: "}</span>
         <span style="color: #06b6d4; font-size: 18px; font-weight: bold;">${formatCurrencyEmail(total, currency)}</span>
       </div>
     </div>
 
     <!-- Delivery info -->
-    ${deliveryInfos.length > 0 ? `
+    ${!isReservation && deliveryInfos.length > 0 ? `
     <div style="background-color: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
       <h3 style="margin: 0 0 8px; color: #06b6d4; font-size: 16px;">📩 Entrega de entradas</h3>
       ${deliveryInfos.map((info) => `<p style="margin: 0; color: #f0f0f5; font-size: 14px; line-height: 1.6;">${info}</p>`).join("")}
