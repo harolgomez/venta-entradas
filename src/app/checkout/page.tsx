@@ -2,17 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CreditCard, ArrowLeft, Loader2, Info } from "lucide-react";
+import { CreditCard, ArrowLeft, Loader2, Info, AlertTriangle } from "lucide-react";
 import { TrustBanner } from "@/components/trust/trust-banner";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useCart } from "@/hooks/use-cart";
 import { useUser } from "@/hooks/use-user";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
+import { RESERVATION_PERCENTAGE } from "@/lib/constants";
 
 export default function CheckoutPage() {
-  const { items, totalPrice, totalItems } = useCart();
+  const { items, totalPrice, totalItems, hasReservations } = useCart();
   const { user, loading: userLoading } = useUser();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
@@ -65,6 +67,7 @@ export default function CheckoutPage() {
             ticketZoneId: item.ticketZoneId,
             eventId: item.eventId,
             quantity: item.quantity,
+            isReservation: item.isReservation,
           })),
         }),
       });
@@ -97,28 +100,68 @@ export default function CheckoutPage() {
 
       <h1 className="text-3xl font-bold text-text-primary mb-8">Checkout</h1>
 
+      {/* Reservation warning */}
+      {hasReservations && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6">
+          <div className="flex items-start gap-2.5">
+            <AlertTriangle className="w-5 h-5 text-amber-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-amber-200 mb-1">Reserva de entradas</p>
+              <p className="text-xs text-amber-200/80 leading-relaxed">
+                Estas separando entradas pagando el 20% del valor total. El 80% restante
+                debe pagarse hasta 30 dias antes del evento. Si no se completa el pago
+                dentro de ese plazo, la reserva sera anulada y no se realizara devolucion
+                del monto abonado.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Order summary */}
       <div className="bg-surface border border-border rounded-xl p-6 mb-6">
         <h2 className="font-semibold text-text-primary mb-4">Resumen de tu orden</h2>
 
         <div className="space-y-3 mb-4">
-          {items.map((item) => (
-            <div key={item.ticketZoneId} className="flex justify-between text-sm">
-              <span className="text-text-secondary">
-                {item.quantity}x {item.zoneName} — {item.eventTitle}
-              </span>
-              <span className="text-text-primary font-medium">
-                {formatCurrency(item.unitPrice * item.quantity, item.currency)}
-              </span>
-            </div>
-          ))}
+          {items.map((item) => {
+            const effectivePrice = item.isReservation
+              ? item.unitPrice * RESERVATION_PERCENTAGE
+              : item.unitPrice;
+            return (
+              <div key={`${item.ticketZoneId}-${item.isReservation}`} className="flex justify-between text-sm">
+                <span className="text-text-secondary flex items-center gap-2">
+                  {item.quantity}x {item.zoneName} — {item.eventTitle}
+                  {item.isReservation && (
+                    <Badge variant="warning">Reserva 20%</Badge>
+                  )}
+                </span>
+                <span className="text-text-primary font-medium">
+                  {formatCurrency(effectivePrice * item.quantity, item.currency)}
+                </span>
+              </div>
+            );
+          })}
         </div>
 
         <div className="border-t border-border pt-3">
           <div className="flex justify-between font-semibold text-base">
-            <span className="text-text-primary">Total</span>
+            <span className="text-text-primary">
+              {hasReservations ? "Total a pagar ahora" : "Total"}
+            </span>
             <span className="text-accent">{formatCurrency(total)}</span>
           </div>
+          {hasReservations && (
+            <div className="flex justify-between text-sm mt-1">
+              <span className="text-text-secondary">Saldo pendiente (80%)</span>
+              <span className="text-amber-400">
+                {formatCurrency(
+                  items
+                    .filter((i) => i.isReservation)
+                    .reduce((sum, i) => sum + i.unitPrice * (1 - RESERVATION_PERCENTAGE) * i.quantity, 0)
+                )}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -174,7 +217,7 @@ export default function CheckoutPage() {
         ) : (
           <>
             <CreditCard className="w-5 h-5" />
-            Pagar {formatCurrency(total)}
+            {hasReservations ? `Pagar reserva ${formatCurrency(total)}` : `Pagar ${formatCurrency(total)}`}
           </>
         )}
       </Button>

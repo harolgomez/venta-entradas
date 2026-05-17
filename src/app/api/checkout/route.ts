@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { preferenceClient } from "@/lib/mercadopago/server";
 import { checkoutSchema } from "@/lib/validators/checkout";
+import { RESERVATION_PERCENTAGE } from "@/lib/constants";
 
 export async function POST(request: Request) {
   try {
@@ -48,6 +49,7 @@ export async function POST(request: Request) {
       quantity: number;
       unitPrice: number;
       currency: string;
+      isReservation: boolean;
     }[] = [];
 
     for (const item of items) {
@@ -71,11 +73,19 @@ export async function POST(request: Request) {
         quantity: item.quantity,
         unitPrice: zone.price,
         currency: zone.currency,
+        isReservation: item.isReservation,
       });
     }
 
-    // 5. Calculate total
-    const total = lineItems.reduce((sum, li) => sum + li.unitPrice * li.quantity, 0);
+    // 5. Calculate totals
+    const hasReservations = lineItems.some((li) => li.isReservation);
+    const paymentTotal = lineItems.reduce((sum, li) => {
+      const price = li.isReservation ? li.unitPrice * RESERVATION_PERCENTAGE : li.unitPrice;
+      return sum + price * li.quantity;
+    }, 0);
+    const reservationFullTotal = hasReservations
+      ? lineItems.reduce((sum, li) => sum + li.unitPrice * li.quantity, 0)
+      : null;
 
     // 6. Get event names for preference items
     const eventIds = [...new Set(lineItems.map((li) => li.eventId))];
@@ -92,9 +102,11 @@ export async function POST(request: Request) {
       .insert({
         user_id: user.id,
         status: "pending",
-        total,
+        total: paymentTotal,
         currency: lineItems[0]?.currency ?? "USD",
         customer_email: user.email!,
+        is_reservation: hasReservations,
+        reservation_total: reservationFullTotal,
       })
       .select("id")
       .single();
@@ -118,13 +130,21 @@ export async function POST(request: Request) {
     // 9. Create MercadoPago Preference
     const preference = await preferenceClient.create({
       body: {
-        items: lineItems.map((li) => ({
-          id: li.zoneId,
-          title: `${eventNames.get(li.eventId) ?? "Evento"} - ${li.zoneName}`,
-          quantity: li.quantity,
-          unit_price: li.unitPrice,
-          currency_id: li.currency,
-        })),
+        items: lineItems.map((li) => {
+          const mpPrice = li.isReservation
+            ? Math.round(li.unitPrice * RESERVATION_PERCENTAGE * 100) / 100
+            : li.unitPrice;
+          const title = li.isReservation
+            ? `RESERVA (20%) - ${eventNames.get(li.eventId) ?? "Evento"} - ${li.zoneName}`
+            : `${eventNames.get(li.eventId) ?? "Evento"} - ${li.zoneName}`;
+          return {
+            id: li.zoneId,
+            title,
+            quantity: li.quantity,
+            unit_price: mpPrice,
+            currency_id: li.currency,
+          };
+        }),
         payer: {
           email: user.email!,
         },

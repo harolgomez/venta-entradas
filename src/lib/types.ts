@@ -38,6 +38,8 @@ export interface Order {
   total: number;
   currency: string;
   customer_email: string;
+  is_reservation: boolean;
+  reservation_total: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -69,4 +71,5 @@ export interface CartItem {
   unitPrice: number;
   quantity: number;
   currency: string;
+  isReservation: boolean;
 }

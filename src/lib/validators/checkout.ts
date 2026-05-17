@@ -4,6 +4,7 @@ export const checkoutItemSchema = z.object({
   ticketZoneId: z.string().uuid(),
   eventId: z.string().uuid(),
   quantity: z.number().int().min(1).max(6),
+  isReservation: z.boolean().default(false),
 });
 
 export const checkoutSchema = z.object({

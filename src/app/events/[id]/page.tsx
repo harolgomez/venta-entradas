@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Calendar, MapPin, Clock, ArrowLeft, Info } from "lucide-react";
+import { Calendar, MapPin, Clock, ArrowLeft, Info, CalendarClock } from "lucide-react";
 import { TrustBanner } from "@/components/trust/trust-banner";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -156,6 +156,35 @@ export default async function EventDetailPage({ params }: EventPageProps) {
           </p>
         )}
       </section>
+
+      {/* Reservation section */}
+      {typedZones.length > 0 && totalAvailable > 0 && typedEvent.status === "active" && (
+        <section className="mt-10">
+          <div className="flex items-center gap-2 mb-2">
+            <CalendarClock className="w-5 h-5 text-accent" />
+            <h2 className="text-xl font-bold text-text-primary">
+              Separa tu entrada
+            </h2>
+          </div>
+          <p className="text-sm text-text-secondary mb-4">
+            Paga solo el 20% ahora y asegura tu lugar.
+          </p>
+
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-4">
+            <p className="text-sm text-amber-200 leading-relaxed">
+              <strong>Importante:</strong> El 80% restante del valor de la entrada debe pagarse
+              hasta 30 dias antes del evento. Si no se completa el pago dentro de ese plazo,
+              la reserva sera anulada y no se realizara devolucion del monto abonado.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {typedZones.map((zone) => (
+              <TicketZoneCard key={`reservation-${zone.id}`} zone={zone} event={typedEvent} mode="reservation" />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Delivery info */}
       {typedEvent.delivery_info && (
