@@ -25,8 +25,6 @@ export default async function DashboardPage() {
       status,
       total,
       currency,
-      is_reservation,
-      reservation_total,
       created_at,
       order_items (
         id,
