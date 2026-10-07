@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PayBalanceButton } from "./pay-balance-button";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 interface OrderItemDisplay {
@@ -16,6 +17,8 @@ interface OrderDisplay {
   status: string;
   total: number;
   currency: string;
+  is_reservation: boolean | null;
+  reservation_total: number | null;
   created_at: string;
   order_items: OrderItemDisplay[];
 }
@@ -44,6 +47,10 @@ export function OrderHistory({ orders }: OrderHistoryProps) {
     <div className="space-y-4">
       {orders.map((order) => {
         const config = statusConfig[order.status] ?? statusConfig.pending;
+        const balance =
+          order.is_reservation && order.status === "paid" && order.reservation_total != null
+            ? Math.round((order.reservation_total - order.total) * 100) / 100
+            : 0;
 
         return (
           <Card key={order.id}>
@@ -51,6 +58,7 @@ export function OrderHistory({ orders }: OrderHistoryProps) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3">
                   <Badge variant={config.variant}>{config.label}</Badge>
+                  {balance > 0 && <Badge variant="warning">Reserva 20%</Badge>}
                   <span className="text-sm text-text-secondary">
                     {formatDate(order.created_at)}
                   </span>
@@ -76,6 +84,24 @@ export function OrderHistory({ orders }: OrderHistoryProps) {
                   </div>
                 ))}
               </div>
+
+              {balance > 0 && (
+                <div className="mt-4 pt-4 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-text-primary">
+                      Saldo pendiente: {formatCurrency(balance, order.currency)}
+                    </p>
+                    <p className="text-xs text-text-secondary">
+                      Completa el pago de tu reserva para asegurar tu entrada.
+                    </p>
+                  </div>
+                  <PayBalanceButton
+                    orderId={order.id}
+                    balance={balance}
+                    currency={order.currency}
+                  />
+                </div>
+              )}
 
               <p className="text-xs text-text-secondary/60 mt-3">
                 Orden: {order.id.slice(0, 8)}...
